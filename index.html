@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Heist! Lineup Wars</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Setup screen -->
+  <section id="setup-section" class="screen active">
+    <h1>Heist! Lineup Wars</h1>
+    <form id="setup-form">
+      <label>
+        Number of Players (2-6):
+        <input type="number" id="player-count" min="2" max="6" value="2" required />
+      </label>
+
+      <fieldset>
+        <legend>Category Choice</legend>
+        <label>
+          <input type="radio" name="category-choice" value="custom" checked />
+          Custom single category for all rounds
+        </label>
+        <input type="text" id="custom-category" placeholder="Enter custom category" required />
+        <br>
+        <br>
+        <hr>
+        <br>
+
+        <label>
+          <input type="radio" name="category-choice" value="random" />
+          Use predefined random categories per round
+        </label>
+      </fieldset>
+
+      <button type="submit" class="btn-primary">Start Draft</button>
+    </form>
+  </section>
+
+  <!-- Draft screen -->
+  <section id="draft-section" class="screen">
+    <h1>Heist! Lineup Wars</h1>
+    <div id="scenario-container" class="hidden">
+      <h2>Hidden Scenario</h2>
+      <div id="scenario" class="scenario hidden"></div>
+    </div>
+
+    <div id="draft-info">
+      <div><strong>Current Pick:</strong> <span id="current-player"></span></div>
+      <div><strong>Current Role:</strong> <span id="current-role"></span></div>
+      <div><strong>Category:</strong> <span id="current-category"></span></div>
+    </div>
+
+    <div id="draft-table-wrapper">
+      <table id="draft-table" aria-label="Draft picks table">
+        <thead>
+          <tr>
+            <th>Round / Role</th>
+            <!-- Player headers filled by JS -->
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows filled by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <form id="pick-form" class="pick-form">
+      <label for="character-input">Enter character for <span id="input-role"></span>:</label>
+      <input type="text" id="character-input" required autocomplete="off" />
+      <button type="submit" class="btn-primary">Confirm Pick</button>
+    </form>
+  </section>
+
+  <!-- Finalize screen -->
+  <section id="finalize-section" class="screen">
+    <h1>Finalized Heist Crews</h1>
+    <div id="final-crews"></div>
+
+    <h2>Heist Scenario</h2>
+    <div id="final-scenario"></div>
+
+    <h2>ChatGPT Evaluation Prompt</h2>
+    <pre id="chatgpt-prompt" tabindex="0"></pre>
+    <button id="copy-prompt-btn" class="btn-secondary">Copy to ChatGPT</button>
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
