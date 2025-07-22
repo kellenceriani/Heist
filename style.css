@@ -1,4 +1,6 @@
-/* Reset & basics */
+/* ===========================
+   Reset & Basics
+=========================== */
 * {
   box-sizing: border-box;
 }
@@ -12,7 +14,6 @@ body {
   justify-content: center;
   padding: 0.5rem;
 }
-
 #app {
   max-width: 950px;
   width: 100%;
@@ -22,7 +23,9 @@ body {
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Headings */
+/* ===========================
+   Headings
+=========================== */
 h1, h2 {
   color: #333;
   margin-bottom: 1rem;
@@ -31,7 +34,9 @@ h1, h2 {
   letter-spacing: 0.03em;
 }
 
-/* Show active screen */
+/* ===========================
+   Screen Navigation
+=========================== */
 .screen {
   display: none;
 }
@@ -39,7 +44,9 @@ h1, h2 {
   display: block;
 }
 
-/* Setup form */
+/* ===========================
+   Setup Form
+=========================== */
 #setup-form label, fieldset {
   display: block;
   margin-bottom: 1rem;
@@ -77,11 +84,12 @@ fieldset legend {
 }
 #setup-form label input[type="radio"] {
   margin-right: 0.4rem;
-  transform: scale(1);
   vertical-align: middle;
 }
 
-/* Buttons */
+/* ===========================
+   Buttons
+=========================== */
 .btn-primary {
   background: #222;
   color: #fff;
@@ -99,7 +107,6 @@ fieldset legend {
   opacity: 0.6;
   cursor: not-allowed;
 }
-
 .btn-secondary {
   background: transparent;
   border: 1.5px solid #999;
@@ -113,7 +120,9 @@ fieldset legend {
   background: #eee;
 }
 
-/* Draft info */
+/* ===========================
+   Draft Info
+=========================== */
 #draft-info {
   display: flex;
   gap: 1.5rem;
@@ -141,7 +150,6 @@ fieldset legend {
   color: #666;
   text-transform: uppercase;
 }
-
 #current-player,
 #current-role,
 #current-category {
@@ -150,7 +158,9 @@ fieldset legend {
   color: #000;
 }
 
-/* Scenario */
+/* ===========================
+   Scenario Box
+=========================== */
 #scenario-container {
   margin-bottom: 1.5rem;
   text-align: center;
@@ -178,7 +188,9 @@ fieldset legend {
   opacity: 1;
 }
 
-/* Draft table */
+/* ===========================
+   Draft Table (Compact & Responsive)
+=========================== */
 #draft-table-wrapper {
   overflow-x: auto;
   margin-bottom: 1.5rem;
@@ -194,7 +206,8 @@ fieldset legend {
   font-weight: 500;
   color: #333;
 }
-#draft-table th, #draft-table td {
+#draft-table th,
+#draft-table td {
   border: 1px solid #ddd;
   padding: 0.5rem 0.75rem;
   text-align: center;
@@ -206,20 +219,33 @@ fieldset legend {
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
+#draft-table th:first-child,
+#draft-table td:first-child {
+  width: 45%;
+  min-width: 120px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+#draft-table th.player-header,
+#draft-table td:not(:first-child) {
+  width: calc(55% / 5);
+  font-size: 0.85rem;
+  word-break: break-word;
+  padding: 0.4rem 0.5rem;
+}
 #draft-table td.current-pick {
   background: #d4eaff;
   color: #000;
   font-style: italic;
+  position: relative;
 }
 #draft-table td.current-pick::after {
-  content: '⬤';
-  color: #888;
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  font-size: 1rem;
+    content: '🧤';
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 1.1rem;
 }
-
 .role-name {
   font-weight: 600;
   color: #555;
@@ -228,7 +254,9 @@ fieldset legend {
   text-transform: lowercase !important;
 }
 
-/* Pick form */
+/* ===========================
+   Pick Form
+=========================== */
 .pick-form {
   display: flex;
   gap: 1rem;
@@ -256,7 +284,9 @@ fieldset legend {
   font-weight: 500;
 }
 
-/* Finalize section */
+/* ===========================
+   Finalize Screen
+=========================== */
 #final-crews {
   margin-bottom: 1.5rem;
 }
@@ -286,7 +316,9 @@ fieldset legend {
   font-size: 0.95rem;
 }
 
-/* ChatGPT prompt */
+/* ===========================
+   ChatGPT Prompt
+=========================== */
 #chatgpt-prompt {
   background: #f5f5f5;
   padding: 1rem;
@@ -302,18 +334,88 @@ fieldset legend {
   margin-bottom: 1.5rem;
 }
 
-/* Responsive */
+/* ===========================
+   Responsive Design (Compact Mobile)
+=========================== */
 @media (max-width: 700px) {
-  #draft-info {
-    flex-direction: column;
+  #app {
+    padding: 1rem;
   }
-  #draft-table {
-    min-width: 500px;
+  h1, h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+  #setup-form label, fieldset {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+  fieldset {
+    padding: 0.75rem;
+  }
+  #setup-form input[type="text"],
+  #setup-form input[type="number"] {
+    font-size: 0.9rem;
+    padding: 0.35rem 0.5rem;
+  }
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.4rem 1rem;
+    font-size: 0.95rem;
+  }
+#draft-info {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 0.5rem 0.5rem;
+  gap: 0.5rem;
+}
+
+#draft-info > div {
+  flex: 1 1 100px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #ddd;
+}
+
+#draft-info > div strong {
+  font-size: 0.75rem;
+  margin-bottom: 0.15rem;
+  color: #666;
+}
+
+  #scenario-container {
+    padding: 0.5rem;
+    font-size: 0.9rem;
   }
   .pick-form {
     flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
   #character-input {
+    font-size: 0.95rem;
+    padding: 0.45rem;
     width: 100%;
+  }
+  #draft-table-wrapper {
+    overflow-x: scroll;
+    max-width: 100%;
+  }
+  #draft-table {
+    font-size: 0.85rem;
+    min-width: 100%;
+  }
+  .crew-block {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  .crew-character, .crew-role {
+    font-size: 0.85rem;
+  }
+  #chatgpt-prompt {
+    font-size: 0.85rem;
+    padding: 0.75rem;
   }
 }

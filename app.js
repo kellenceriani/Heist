@@ -262,7 +262,7 @@ function buildDraftTable() {
   for (let r = 0; r < 6; r++) {
     const tr = document.createElement("tr");
     const th = document.createElement("th");
-    th.textContent = `Round ${r + 1} / ${ROLES[r]}`;
+    th.textContent = `Round ${r + 1} : ${ROLES[r]}`;
     th.classList.add("role-name");
     tr.appendChild(th);
 
@@ -382,7 +382,7 @@ function copyPromptToClipboard() {
   navigator.clipboard.writeText(chatgptPromptPre.textContent)
     .then(() => {
       copyPromptBtn.textContent = "Copied!";
-      setTimeout(() => copyPromptBtn.textContent = "Copy to ChatGPT", 1500);
+      setTimeout(() => copyPromptBtn.textContent = "Copy", 1500);
     })
     .catch(() => alert("Failed to copy prompt. Please copy manually."));
 }
@@ -474,3 +474,11 @@ pickForm.addEventListener("submit", e => {
 });
 
 copyPromptBtn.addEventListener("click", copyPromptToClipboard);
+const editPromptBtn = document.getElementById("edit-prompt-btn");
+
+editPromptBtn.addEventListener("click", () => {
+  const isEditable = chatgptPromptPre.contentEditable === "true";
+  chatgptPromptPre.contentEditable = isEditable ? "false" : "true";
+  chatgptPromptPre.focus();
+  editPromptBtn.textContent = isEditable ? "Edit" : "Lock";
+});

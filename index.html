@@ -89,8 +89,18 @@
     <div id="final-scenario"></div>
 
     <h2>ChatGPT Evaluation Prompt</h2>
-    <pre id="chatgpt-prompt" tabindex="0"></pre>
-    <button id="copy-prompt-btn" class="btn-secondary">Copy to ChatGPT</button>
+<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+  <pre id="chatgpt-prompt" contenteditable="false" tabindex="0" style="flex: 1; min-height: 200px; overflow: auto; background: #f9f9f9; padding: 1rem; border: 1px solid #ccc;"></pre>
+  
+  <div style="display: flex; flex-direction: column; gap: 0.5rem; min-width: 150px;">
+    <button id="copy-prompt-btn" class="btn-secondary">Copy</button>
+    <button id="edit-prompt-btn" class="btn-secondary">Edit</button>
+    <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
+      <button class="btn-primary">Go to ChatGPT →</button>
+    </a>
+  </div>
+</div>
+
   </section>
 
 </div>
