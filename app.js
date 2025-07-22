@@ -255,12 +255,17 @@ function generateNameInputs() {
 
   playerNamesContainer.innerHTML = ""; // Clear existing inputs
   for (let i = 0; i < count; i++) {
-    const label = document.createElement("label");
-    label.innerHTML = `Player ${i + 1} Name: <input type="text" class="player-name" data-index="${i}" required />`;
-    playerNamesContainer.appendChild(label);
-    // playerNamesContainer.appendChild(document.createElement("br"));
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = `Player ${i + 1} Name`;
+    input.className = "player-name";
+    input.dataset.index = i;
+    input.required = true;
+    input.style.margin = "0.25em";
+    playerNamesContainer.appendChild(input);
   }
 }
+
 function prepareMindGamesKillPhase() {
   mindgamesKills.clear();
   mindgamesCurrentKillerIndex = 0;
