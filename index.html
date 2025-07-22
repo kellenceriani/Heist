@@ -23,7 +23,7 @@
 <hr>
 <div id="player-names-container" style="margin-top: 0.5rem;"></div>
 
-<br><br>
+<br>
       <fieldset>
         <legend>Category Choice</legend>
         <label>
@@ -40,6 +40,13 @@
          Random categories per round.
         </label>
       </fieldset>
+<!-- --New Modes!-- -->
+<fieldset>
+  <legend>Extra Modes (optional)</legend>
+  <label><input type="checkbox" name="xtra-mode" value="none" checked /> None</label>
+  <label><input type="checkbox" name="xtra-mode" value="wildcard" /> 🃏 Wild Card</label>
+  <label><input type="checkbox" disabled name="xtra-mode" value="gobag" /> 🧳 Go Bag Draft <span style="color: red;">&lt; -- Coming Soon</span></label> 
+</fieldset>
 
       <button type="submit" class="btn-primary">Start Draft</button>
     </form>
@@ -58,7 +65,7 @@
       <div><strong>Current Role:</strong> <span id="current-role"></span></div>
       <div><strong>Category:</strong> <span id="current-category"></span></div>
     </div>
-
+    
     <div id="draft-table-wrapper">
       <table id="draft-table" aria-label="Draft picks table">
         <thead>

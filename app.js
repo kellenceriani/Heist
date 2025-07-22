@@ -9,6 +9,40 @@ const ROLES = [
   "Safecracker",
   "Lookout"
 ];
+// Wild Card surprise roles
+const SURPRISE_ROLES = [
+  "Animal Handler",
+  "Seductress",
+  "Demolitions Expert",
+  "Social Engineer",
+  "Impersonator",
+  "Pyromaniac",
+  "Drone Operator",
+  "Escape Artist",
+  "Cryptozoologist",
+  "Conspiracy Theorist",
+  "Forensic Botanist",
+  "Pickpocket",
+  "Urban Explorer",
+  "Hypnotist",
+  "Shadow Puppeteer",
+  "Mime",
+  "Ventriloquist",
+  "Acrobat",
+  "Street Magician",
+  "Dumpster Diver",
+  "Lockpicker-in-Training",
+  "Art Forger",
+  "Puzzle Master",
+  "Tattoo Decoder",
+  "Night Vision Specialist",
+  "Smokescreen Expert",
+  "Crowd Distraction Coordinator",
+  "Psychic Medium",
+  "Burglar Alarm Whisperer",
+  "Counterfeit Chef"
+];
+
 
 // Predefined random categories per round
 const RANDOM_CATEGORIES = [
@@ -177,6 +211,26 @@ const finalScenarioDiv = document.getElementById("final-scenario");
 const chatgptPromptPre = document.getElementById("chatgpt-prompt");
 const copyPromptBtn = document.getElementById("copy-prompt-btn");
 
+const wildcardContainer = document.createElement("div");
+wildcardContainer.id = "wildcard-container";
+wildcardContainer.className = "Hider"; // hidden initially
+wildcardContainer.style = `
+  position: fixed; top: 10%; left: 50%; transform: translateX(-50%);
+  background: white; border: 3px solid #cc00cc; padding: 1.5rem; max-width: 320px;
+  box-shadow: 0 0 10px #cc00cc;
+  z-index: 1000;
+`;
+wildcardContainer.innerHTML = `
+  <h2>🃏 Wild Card Round Reveal</h2>
+  <p id="wildcard-message"></p>
+  <button id="wildcard-close-btn" class="btn-primary">Continue</button>
+`;
+document.body.appendChild(wildcardContainer);
+
+const wildcardMessageP = document.getElementById("wildcard-message");
+const wildcardCloseBtn = document.getElementById("wildcard-close-btn");
+
+let wildcardedRole = null; // keep globally so both finalizeDraft and alert can access
 // State variables
 let playerCount = 3;
 let players = [];
@@ -324,7 +378,42 @@ function allPicksDone() {
 }
 
 function finalizeDraft() {
+  wildcardContainer.classList.add("Hider");  // hide at start, just in case
+
+  // Apply Wild Card role swap after draft ends
+  wildcardedRole = null;
+  if (isModeActive("wildcard")) {
+    const replaceIndex = Math.floor(Math.random() * ROLES.length);
+    const newRole = SURPRISE_ROLES[Math.floor(Math.random() * SURPRISE_ROLES.length)];
+    wildcardedRole = newRole;
+
+    for (let p = 0; p < playerCount; p++) {
+      draftData[replaceIndex][p].role = newRole;
+    }
+
+    ROLES[replaceIndex] = newRole;
+  }
+
+  // If Wild Card is active, show alert first
+  if (wildcardedRole) {
+    wildcardMessageP.textContent = `One traditional role was replaced with a surprise twist: "${wildcardedRole}". Get ready to see your final crews!`;
+    wildcardContainer.classList.remove("Hider");
+    draftSection.style.display = "none";  // hide draft screen during alert
+
+    wildcardCloseBtn.onclick = () => {
+      wildcardContainer.classList.add("Hider");
+      showFinalizeScreen();
+    };
+  } else {
+    showFinalizeScreen();
+  }
+}
+
+
+function showFinalizeScreen() {
   showScreen(finalizeSection);
+  draftSection.style.display = ""; // restore draft section display
+
   finalCrewsDiv.innerHTML = "";
 
   for (let p = 0; p < playerCount; p++) {
@@ -342,6 +431,12 @@ function finalizeDraft() {
 
   finalScenarioDiv.textContent = scenario;
 
+  // Build the ChatGPT prompt text (unchanged, omitted here for brevity)
+  buildChatGPTPrompt();
+}
+
+// Helper function to build prompt (extracted for cleanliness)
+function buildChatGPTPrompt() {
   let prompt = `
 Evaluate the following Heist Crews with precision. For each crew member, assign a 'Heist Score' (OVR rating) from 0–100 based on:
 
@@ -364,6 +459,10 @@ Be stylish, punchy, and format results clearly—optimized for both desktop and 
 
   prompt += `Here are the crews:\n\n`;
 
+  if (wildcardedRole) {
+    prompt += `🃏 Note: The Wild Card Round replaced one traditional role with a surprise twist: "${wildcardedRole}".\n\n`;
+  }
+
   for (let p = 0; p < playerCount; p++) {
     prompt += `${players[p]}:\n`;
     for (let r = 0; r < 6; r++) {
@@ -377,6 +476,7 @@ Be stylish, punchy, and format results clearly—optimized for both desktop and 
   prompt += `The heist scenario: ${scenario}`;
   chatgptPromptPre.textContent = prompt;
 }
+
 
 function copyPromptToClipboard() {
   navigator.clipboard.writeText(chatgptPromptPre.textContent)
@@ -423,6 +523,26 @@ setupForm.addEventListener("submit", e => {
   characterInput.focus();
   showScreen(draftSection);
 });
+// Mode checkboxes
+const modeCheckboxes = document.querySelectorAll('input[name="xtra-mode"]');
+
+modeCheckboxes.forEach(cb => {
+  cb.addEventListener("change", () => {
+    if (cb.value === "none" && cb.checked) {
+      modeCheckboxes.forEach(other => {
+        if (other.value !== "none") other.checked = false;
+      });
+    } else if (cb.checked) {
+      modeCheckboxes.forEach(other => {
+        if (other.value === "none") other.checked = false;
+      });
+    }
+  });
+});
+
+function isModeActive(modeName) {
+  return Array.from(modeCheckboxes).some(cb => cb.checked && cb.value === modeName);
+}
 
 categoryChoiceRadios.forEach(radio => radio.addEventListener("change", updateCategoryInputState));
 updateCategoryInputState();
