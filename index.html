@@ -14,26 +14,30 @@
   <section id="setup-section" class="screen active">
     <h1>Heist! Lineup Wars</h1>
     <form id="setup-form">
-      <label>
-        Number of Players (2-6):
-        <input type="number" id="player-count" min="2" max="6" value="2" required />
-      </label>
+<br>
+<hr>
+<label>
+  Number of Players (2–6):
+  <input type="number" id="player-count" min="2" max="6" value="2" required onchange="generateNameInputs()" />
+</label>
+<hr>
+<div id="player-names-container" style="margin-top: 0.5rem;"></div>
 
+<br><br>
       <fieldset>
         <legend>Category Choice</legend>
         <label>
           <input type="radio" name="category-choice" value="custom" checked />
-          Custom single category for all rounds
+          Custom single category for all rounds.
         </label>
         <input type="text" id="custom-category" placeholder="Enter custom category" required />
-        <br>
-        <br>
+        <br><br>
         <hr>
         <br>
 
         <label>
           <input type="radio" name="category-choice" value="random" />
-          Use predefined random categories per round
+         Random categories per round.
         </label>
       </fieldset>
 

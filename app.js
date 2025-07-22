@@ -33,8 +33,7 @@ const RANDOM_CATEGORIES = [
     "Comedians", "Toys", "Cartoon Network Shows", "Nickelodeon Shows", "Fictional Kid Characters",
     "Princesses (fiction & nonfiction)", "Sidekicks", "Monkeys (fiction & nonfiction)", "Movies", "Fantasy Novels",
     "Villains", "Household Items", "Common Names", "Olympic Sports", "Sports Mascots",
-    "Gods/Goddesses", "Big things (real)", "Holiday Related Entities", "Stupid People", "Smart People"
-  ];
+    "Gods/Goddesses", "Big things (real)", "Holiday Related Entities", "Stupid People", "Smart People"];
 
 // Hardcoded hidden scenarios
 const SCENARIOS = [
@@ -146,8 +145,9 @@ const SCENARIOS = [
   "The crew must replace the target with an identical fake within 60 seconds"
 ];
 
-
 // DOM references
+const playerNamesContainer = document.getElementById("player-names-container");
+
 const setupSection = document.getElementById("setup-section");
 const draftSection = document.getElementById("draft-section");
 const finalizeSection = document.getElementById("finalize-section");
@@ -179,91 +179,79 @@ const copyPromptBtn = document.getElementById("copy-prompt-btn");
 
 // State variables
 let playerCount = 3;
-let players = []; // ["Player 1", "Player 2", ...]
-let categories = []; // array of length 6, each round's category name
+let players = [];
+let categories = [];
 let useCustomCategory = true;
 let customCategoryName = "";
 
 let scenario = "";
 let scenarioRevealed = false;
-
-let draftData = []; 
-// Structure: draftData[roundIndex][playerIndex] = { role, category, character (string) }
-
+let draftData = [];
 let currentRound = 0;
-let currentPickInRound = 0; // 0-based player index picking in current round
+let currentPickInRound = 0;
 
-// Snake draft order helper
-// returns array of player indices in pick order for given round
+function generateNameInputs() {
+  const count = parseInt(playerCountInput.value, 10);
+  if (isNaN(count) || count < 2 || count > 6) return;
+
+  playerNamesContainer.innerHTML = ""; // Clear existing inputs
+  for (let i = 0; i < count; i++) {
+    const label = document.createElement("label");
+    label.innerHTML = `Player ${i + 1} Name: <input type="text" class="player-name" data-index="${i}" required />`;
+    playerNamesContainer.appendChild(label);
+    // playerNamesContainer.appendChild(document.createElement("br"));
+  }
+}
+
+
 function getPickOrder(round) {
-  if (round % 2 === 0) {
-    // even rounds: left-to-right 0..playerCount-1
-    return [...Array(playerCount).keys()];
-  } else {
-    // odd rounds: right-to-left playerCount-1..0
-    return [...Array(playerCount).keys()].reverse();
-  }
+  return round % 2 === 0
+    ? [...Array(playerCount).keys()]
+    : [...Array(playerCount).keys()].reverse();
 }
 
-// Initialize players array (e.g. "Player 1")
 function initPlayers(count) {
-  players = [];
-  for (let i = 1; i <= count; i++) {
-    players.push(`Player ${i}`);
-  }
-}
-
-// Initialize draft data with empty picks
-function initDraftData() {
-  draftData = [];
-  for (let r = 0; r < 6; r++) {
-    const roundRole = ROLES[r];
-    const roundCategory = categories[r];
-    draftData[r] = [];
-    for (let p = 0; p < playerCount; p++) {
-      draftData[r][p] = { role: roundRole, category: roundCategory, character: "" };
-    }
-  }
-}
-
-// Update category input enable/disable based on radio buttons
-function updateCategoryInputState() {
-  const choice = getCategoryChoice();
-  if (choice === "custom") {
-    customCategoryInput.disabled = false;
-    customCategoryInput.required = true;
-  } else {
-    customCategoryInput.disabled = true;
-    customCategoryInput.required = false;
-  }
-}
-
-// Get current category choice radio value
-function getCategoryChoice() {
-  for (const r of categoryChoiceRadios) {
-    if (r.checked) return r.value;
-  }
-  return "custom";
-}
-
-// Show only one main screen section at a time
-function showScreen(screen) {
-  [setupSection, draftSection, finalizeSection].forEach(s => {
-    if (s === screen) s.classList.add("active");
-    else s.classList.remove("active");
+  const nameInputs = document.querySelectorAll(".player-name");
+  players = Array.from({ length: count }, (_, i) => {
+    const name = nameInputs[i]?.value.trim();
+    return name || `Player ${i + 1}`;
   });
 }
 
-// Build the draft table headers and rows with initial empty cells
+
+function initDraftData() {
+  draftData = Array.from({ length: 6 }, (_, r) =>
+    Array.from({ length: playerCount }, () => ({
+      role: ROLES[r],
+      category: categories[r],
+      character: ""
+    }))
+  );
+}
+
+function updateCategoryInputState() {
+  const choice = getCategoryChoice();
+  customCategoryInput.disabled = choice !== "custom";
+  customCategoryInput.required = choice === "custom";
+}
+generateNameInputs();
+
+function getCategoryChoice() {
+  return Array.from(categoryChoiceRadios).find(r => r.checked)?.value || "custom";
+}
+
+function showScreen(screen) {
+  [setupSection, draftSection, finalizeSection].forEach(s =>
+    s.classList.toggle("active", s === screen)
+  );
+}
+
 function buildDraftTable() {
-  // Clear previous headers except first
   while (draftTableHead.children.length > 1) {
     draftTableHead.removeChild(draftTableHead.lastChild);
   }
-  // Clear body
   draftTableBody.innerHTML = "";
 
-  // Add player headers
   for (let p = 0; p < playerCount; p++) {
     const th = document.createElement("th");
     th.textContent = players[p];
@@ -271,10 +259,8 @@ function buildDraftTable() {
     draftTableHead.appendChild(th);
   }
 
-  // Add rows for rounds and roles
   for (let r = 0; r < 6; r++) {
     const tr = document.createElement("tr");
-
     const th = document.createElement("th");
     th.textContent = `Round ${r + 1} / ${ROLES[r]}`;
     th.classList.add("role-name");
@@ -284,24 +270,17 @@ function buildDraftTable() {
       const td = document.createElement("td");
       td.dataset.round = r;
       td.dataset.player = p;
-      td.textContent = ""; // empty initially
       tr.appendChild(td);
     }
     draftTableBody.appendChild(tr);
   }
 }
 
-// Update the draft table UI with current picks and highlights
 function updateDraftTable() {
-  // Update category header (single row at bottom might be nicer but spec says show all rounds)
-  // We'll highlight the current pick cell
+  draftTableBody.querySelectorAll("td.current-pick").forEach(cell =>
+    cell.classList.remove("current-pick")
+  );
 
-  // Clear all current pick highlights first
-  draftTableBody.querySelectorAll("td.current-pick").forEach(cell => {
-    cell.classList.remove("current-pick");
-  });
-
-  // Update all cells text content with current draftData characters
   for (let r = 0; r < 6; r++) {
     for (let p = 0; p < playerCount; p++) {
       const td = draftTableBody.querySelector(`td[data-round="${r}"][data-player="${p}"]`);
@@ -309,32 +288,21 @@ function updateDraftTable() {
     }
   }
 
-  // Highlight current pick cell
   const pickOrder = getPickOrder(currentRound);
   const currentPlayerIndex = pickOrder[currentPickInRound];
   const currentTd = draftTableBody.querySelector(`td[data-round="${currentRound}"][data-player="${currentPlayerIndex}"]`);
-  if (currentTd) {
-    currentTd.classList.add("current-pick");
-  }
+  currentTd?.classList.add("current-pick");
 
-  // Show snake draft order visually on player headers for current round
   draftTableHead.querySelectorAll("th.player-header").forEach((th, p) => {
     th.classList.remove("player-left", "player-right");
   });
-  if (currentRound % 2 === 0) {
-    // left-to-right
-    for (let p = 0; p < playerCount; p++) {
-      draftTableHead.children[p + 1].classList.add("player-left");
-    }
-  } else {
-    // right-to-left
-    for (let p = 0; p < playerCount; p++) {
-      draftTableHead.children[p + 1].classList.add("player-right");
-    }
-  }
+
+  const directionClass = currentRound % 2 === 0 ? "player-left" : "player-right";
+  draftTableHead.querySelectorAll("th.player-header").forEach(th =>
+    th.classList.add(directionClass)
+  );
 }
 
-// Update current draft info: player picking, role, category
 function updateDraftInfo() {
   const pickOrder = getPickOrder(currentRound);
   const currentPlayerIndex = pickOrder[currentPickInRound];
@@ -344,174 +312,151 @@ function updateDraftInfo() {
   inputRoleSpan.textContent = ROLES[currentRound];
 }
 
-// Reveal scenario with dramatic UI effect
 function revealScenario() {
   scenarioRevealed = true;
   scenarioDiv.textContent = scenario;
-  scenarioDiv.classList.remove("hidden");
-  scenarioDiv.classList.add("visible");
+  scenarioDiv.classList.replace("hidden", "visible");
   scenarioContainer.classList.remove("hidden");
 }
 
-// Check if all picks are completed (all 6 rounds * players)
 function allPicksDone() {
   return currentRound === 6;
 }
 
-// On finalize, build final crews display and ChatGPT prompt
 function finalizeDraft() {
   showScreen(finalizeSection);
-
-  // Display crews by player in role order
   finalCrewsDiv.innerHTML = "";
 
   for (let p = 0; p < playerCount; p++) {
     const crewDiv = document.createElement("div");
     crewDiv.className = "crew-block";
     crewDiv.innerHTML = `<h3>${players[p]}'s Heist Crew</h3>`;
-
     for (let r = 0; r < 6; r++) {
-      const role = ROLES[r];
-      const character = draftData[r][p].character || "[No pick]";
+      const { role, category, character } = draftData[r][p];
       const roleLine = document.createElement("p");
-      roleLine.innerHTML = `<span class="crew-role">${role}:</span> <span class="crew-character">${character}</span>`;
+      roleLine.innerHTML = `<span class="crew-role">${role}:</span> <span class="crew-character">${character}</span>${useCustomCategory ? "" : ` — ${category}`}`;
       crewDiv.appendChild(roleLine);
     }
     finalCrewsDiv.appendChild(crewDiv);
   }
 
-  // Display scenario
   finalScenarioDiv.textContent = scenario;
 
-  // Build ChatGPT prompt text
-  let prompt = `Evaluate these Heist Crews and assign each drafted member a 'Heist Value' from 0–100 based on realism (40%), usefulness to the role (40%), and creativity/fun factor (20%). Then announce the most capable crew on paper, list 5 characters that were criminally underrated ('Heist Snubs'), and simulate a high-stakes vault heist with dynamic storytelling and a winning crew.\n\nHere are the crews:\n\n`;
+  let prompt = `
+Evaluate the following Heist Crews with precision. For each crew member, assign a 'Heist Score' (OVR rating) from 0–100 based on:
+
+- Role Fit (40%) — How well they fulfill their specific role.
+- Realism (30%) — How plausible or tactically sound their inclusion is.
+- Creativity / Fun Factor (30%) — Uniqueness, charm, or surprise element.
+
+Then, do the following:
+
+1. 🏆 Rank all crews from strongest to weakest with total crew scores.
+2. 🔥 Identify the top 5–10 most underrated picks (“Heist Snubs”) with reasons.
+3. 🎭 Simulate an 'heist off' between the two crews that lasts 10 short numbered lines where anything can happen, the heist scenario greatly affecting this.
+4. 🧪 Bonus: Evaluate team chemistry, MVP of the heist, and give each team a codename.
+
+Be stylish, punchy, and format results clearly—optimized for both desktop and mobile. Use bullet points, spacing, and emojis where helpful.\n\n`;
+
+  if (useCustomCategory) {
+    prompt += `Category: ${customCategoryName}\n\n`;
+  }
+
+  prompt += `Here are the crews:\n\n`;
 
   for (let p = 0; p < playerCount; p++) {
     prompt += `${players[p]}:\n`;
     for (let r = 0; r < 6; r++) {
-      const role = ROLES[r];
-      const character = draftData[r][p].character || "[No pick]";
-      prompt += `- ${role}: ${character}\n`;
+      const { role, category, character } = draftData[r][p];
+      const catInfo = useCustomCategory ? "" : ` — ${category}`;
+      prompt += `- ${role}: ${character}${catInfo}\n`;
     }
     prompt += "\n";
   }
 
   prompt += `The heist scenario: ${scenario}`;
-
   chatgptPromptPre.textContent = prompt;
 }
 
-// Copy ChatGPT prompt to clipboard
 function copyPromptToClipboard() {
   navigator.clipboard.writeText(chatgptPromptPre.textContent)
     .then(() => {
       copyPromptBtn.textContent = "Copied!";
       setTimeout(() => copyPromptBtn.textContent = "Copy to ChatGPT", 1500);
     })
-    .catch(() => {
-      alert("Failed to copy prompt. Please copy manually.");
-    });
+    .catch(() => alert("Failed to copy prompt. Please copy manually."));
 }
 
-// Handle setup form submission
 setupForm.addEventListener("submit", e => {
   e.preventDefault();
-
-  // Read player count, validate
   const count = parseInt(playerCountInput.value, 10);
-  if (isNaN(count) || count < 2 || count > 6) {
-    alert("Please enter a player count between 2 and 6.");
-    return;
-  }
+  if (isNaN(count) || count < 2 || count > 6) return alert("Enter 2–6 players.");
   playerCount = count;
 
-  // Determine category choice
   useCustomCategory = getCategoryChoice() === "custom";
   if (useCustomCategory) {
     const cat = customCategoryInput.value.trim();
-    if (!cat) {
-      alert("Please enter a custom category.");
-      return;
-    }
+    if (!cat) return alert("Enter a custom category.");
     customCategoryName = cat;
     categories = Array(6).fill(customCategoryName);
   } else {
-    // Use random predefined categories for each round (shuffle once for variety)
     categories = [...RANDOM_CATEGORIES].slice(0, 6);
   }
 
-  // Initialize players and draft data
   initPlayers(playerCount);
   initDraftData();
 
-  // Pick random scenario hidden for now
   scenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
   scenarioRevealed = false;
   scenarioDiv.classList.add("hidden");
   scenarioDiv.classList.remove("visible");
   scenarioContainer.classList.add("hidden");
 
-  // Build and update draft table
   buildDraftTable();
   updateDraftTable();
 
-  // Reset draft pointers
   currentRound = 0;
   currentPickInRound = 0;
 
-  // Update draft info
   updateDraftInfo();
-
-  // Clear input field and focus
   characterInput.value = "";
   characterInput.focus();
-
-  // Show draft screen
   showScreen(draftSection);
 });
 
-// Enable/disable custom category input dynamically
-categoryChoiceRadios.forEach(radio => {
-  radio.addEventListener("change", updateCategoryInputState);
-});
+categoryChoiceRadios.forEach(radio => radio.addEventListener("change", updateCategoryInputState));
 updateCategoryInputState();
 
-// Handle pick form submission
 pickForm.addEventListener("submit", e => {
   e.preventDefault();
-
   const charName = characterInput.value.trim();
-  if (!charName) {
-    alert("Please enter a character name.");
-    return;
+  if (!charName) return alert("Enter a character name.");
+
+  const lowerName = charName.toLowerCase();
+  for (let r = 0; r < 6; r++) {
+    for (let p = 0; p < playerCount; p++) {
+      if (draftData[r][p].character.toLowerCase() === lowerName) {
+        return alert("That pick has already been taken.");
+      }
+    }
   }
 
-  // Get current player index in snake order
   const pickOrder = getPickOrder(currentRound);
   const playerIndex = pickOrder[currentPickInRound];
 
-  // Save character pick
   draftData[currentRound][playerIndex].character = charName;
 
-  // Move to next pick
   currentPickInRound++;
   if (currentPickInRound >= playerCount) {
     currentPickInRound = 0;
     currentRound++;
   }
-  // Update draft table UI
+
   updateDraftTable();
-  // Check scenario reveal condition: after round 2 picks completed (i.e. before round 3)
-  if (!scenarioRevealed && currentRound >= 2) {
-    revealScenario();
-  }
+  if (!scenarioRevealed && currentRound >= 2) revealScenario();
 
-  // If draft complete, show finalize button and hide pick form
   if (currentRound >= 6) {
-    // Hide pick form
     pickForm.style.display = "none";
-
-    // Show finalize button (create if needed)
     if (!document.getElementById("finalize-btn")) {
       const finalizeBtn = document.createElement("button");
       finalizeBtn.id = "finalize-btn";
@@ -519,21 +464,13 @@ pickForm.addEventListener("submit", e => {
       finalizeBtn.textContent = "Finalize";
       finalizeBtn.style.marginTop = "1rem";
       draftSection.appendChild(finalizeBtn);
-
-      finalizeBtn.addEventListener("click", () => {
-        finalizeDraft();
-      });
+      finalizeBtn.addEventListener("click", finalizeDraft);
     }
   } else {
-    // Update draft info for next pick
     updateDraftInfo();
-
-    // Clear input and focus for next pick
     characterInput.value = "";
     characterInput.focus();
   }
 });
 
-// Copy prompt button event
 copyPromptBtn.addEventListener("click", copyPromptToClipboard);
-
