@@ -1,117 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Heist! Lineup Wars</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heist! Lineup Wars</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+  <!-- Info Button -->
+  <button id="info-btn" title="How to Play">?</button>
 
-<div id="app">
+  <!-- Sliding Info Panel -->
+  <div id="info-panel">
+    <span id="close-info">&times;</span>
+    <h2>🎯 Game Overview</h2>
+    <section>
+      <h3>Heist! Lineup Wars</h3>
+      <p>Assemble a 6-role heist crew by taking turns drafting characters. Draft order snakes each round. A hidden scenario will be revealed mid-draft that could shift strategies.</p>
+    </section>
 
-  <!-- Setup screen -->
-  <section id="setup-section" class="screen active">
-    <h1>Heist! Lineup Wars</h1>
-    <form id="setup-form">
-<br>
-<hr>
-<label>
-  Number of Players (2–6):
-  <input type="number" id="player-count" min="2" max="6" value="2" required onchange="generateNameInputs()" />
-</label>
-<hr>
-<div id="player-names-container" style="margin-top: 0.5rem;"></div>
+    <section>
+      <h3>🃏 Wild Card Mode</h3>
+      <p>Replaces one classic role with a surprise role like “Animal Handler” or “Seductress.” Adds chaos and creativity to the draft. The role and its reveal occur at the end.</p>
+    </section>
 
-<br>
-      <fieldset>
-        <legend>Category Choice</legend>
-        <label>
-          <input type="radio" name="category-choice" value="custom" checked />
-          Custom single category for all rounds.
-        </label>
-        <input type="text" id="custom-category" placeholder="Enter custom category" required />
-        <br><br>
-        <hr>
-        <br>
-
-        <label>
-          <input type="radio" name="category-choice" value="random" />
-         Random categories per round.
-        </label>
-      </fieldset>
-<!-- --New Modes!-- -->
-<fieldset>
-  <legend>Extra Modes (optional)</legend>
-  <label><input type="checkbox" name="xtra-mode" value="none" checked /> None</label>
-  <label><input type="checkbox" name="xtra-mode" value="wildcard" /> 🃏 Wild Card</label>
-  <label><input type="checkbox" disabled name="xtra-mode" value="gobag" /> 🧳 Go Bag Draft <span style="color: red;">&lt; -- Coming Soon</span></label> 
-</fieldset>
-
-      <button type="submit" class="btn-primary">Start Draft</button>
-    </form>
-  </section>
-
-  <!-- Draft screen -->
-  <section id="draft-section" class="screen">
-    <h1>Heist! Lineup Wars</h1>
-    <div id="scenario-container" class="hidden">
-      <h2>Hidden Scenario</h2>
-      <div id="scenario" class="scenario hidden"></div>
-    </div>
-
-    <div id="draft-info">
-      <div><strong>Current Pick:</strong> <span id="current-player"></span></div>
-      <div><strong>Current Role:</strong> <span id="current-role"></span></div>
-      <div><strong>Category:</strong> <span id="current-category"></span></div>
-    </div>
-    
-    <div id="draft-table-wrapper">
-      <table id="draft-table" aria-label="Draft picks table">
-        <thead>
-          <tr>
-            <th>Round / Role</th>
-            <!-- Player headers filled by JS -->
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Rows filled by JS -->
-        </tbody>
-      </table>
-    </div>
-
-    <form id="pick-form" class="pick-form">
-      <label for="character-input">Enter character for <span id="input-role"></span>:</label>
-      <input type="text" id="character-input" required autocomplete="off" />
-      <button type="submit" class="btn-primary">Confirm Pick</button>
-    </form>
-  </section>
-
-  <!-- Finalize screen -->
-  <section id="finalize-section" class="screen">
-    <h1>Finalized Heist Crews</h1>
-    <div id="final-crews"></div>
-
-    <h2>Heist Scenario</h2>
-    <div id="final-scenario"></div>
-
-    <h2>ChatGPT Evaluation Prompt</h2>
-<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
-  <pre id="chatgpt-prompt" contenteditable="false" tabindex="0" style="flex: 1; min-height: 200px; overflow: auto; background: #f9f9f9; padding: 1rem; border: 1px solid #ccc;"></pre>
-  
-  <div style="display: flex; flex-direction: column; gap: 0.5rem; min-width: 150px;">
-    <button id="copy-prompt-btn" class="btn-secondary">Copy</button>
-    <button id="edit-prompt-btn" class="btn-secondary">Edit</button>
-    <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
-      <button class="btn-primary">Go to ChatGPT →</button>
-    </a>
+    <section>
+      <h3>🔒 Mind Games Mode</h3>
+      <p>Before drafting, each player secretly “kills” a character name. If someone drafts a killed character, that pick gets a -50 penalty in the final evaluation.</p>
+    </section>
   </div>
-</div>
+  <div id="app">
 
-  </section>
+    <!-- Setup screen -->
+    <section id="setup-section" class="screen active">
+      <h1>Heist! Lineup Wars</h1>
+      <form id="setup-form">
+        <br>
+        <hr>
+        <label>
+          Number of Players (2–6):
+          <input type="number" id="player-count" min="2" max="6" value="2" required onchange="generateNameInputs()" />
+        </label>
+        <hr>
+        <div id="player-names-container" style="margin-top: 0.5rem;"></div>
 
-</div>
+        <br>
+        <fieldset>
+          <legend>Category Choice</legend>
+          <label>
+            <input type="radio" name="category-choice" value="custom" checked />
+            Custom single category for all rounds.
+          </label>
+          <input type="text" id="custom-category" placeholder="Enter custom category" required />
+          <br><br>
+          <hr>
+          <br>
 
-<script src="app.js"></script>
+          <label>
+            <input type="radio" name="category-choice" value="random" />
+            Random categories per round.
+          </label>
+        </fieldset>
+        <!-- --New Modes!-- -->
+        <fieldset>
+          <legend>Extra Modes 👀</legend>
+          <label><input type="checkbox" name="xtra-mode" value="none" checked /> None</label>
+          <label><input type="checkbox" name="xtra-mode" value="wildcard" /> 🃏 Wild Card</label>
+          <label><input type="checkbox" name="xtra-mode" value="mindgames" /> 🔒 Mind Games Mode</label>
+        </fieldset>
+
+        <button type="submit" class="btn-primary">Start Draft</button>
+      </form>
+    </section>
+    <!-- Mind Games Kill Phase -->
+    <section id="mindgames-section" class="screen">
+      <h2>🔒 Mind Games Kill Phase</h2>
+      <p>Pass the phone. Each player will secretly kill 1 character name. Keep it hidden!</p>
+      <div id="mindgames-entry-area">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+
+    <!-- Draft screen -->
+    <section id="draft-section" class="screen">
+      <h1>Heist! Lineup Wars</h1>
+      <div id="scenario-container" class="hidden">
+        <h2>Hidden Scenario</h2>
+        <div id="scenario" class="scenario hidden"></div>
+      </div>
+
+      <div id="draft-info">
+        <div><strong>Current Pick:</strong> <span id="current-player"></span></div>
+        <div><strong>Current Role:</strong> <span id="current-role"></span></div>
+        <div><strong>Category:</strong> <span id="current-category"></span></div>
+      </div>
+
+      <div id="draft-table-wrapper">
+        <table id="draft-table" aria-label="Draft picks table">
+          <thead>
+            <tr>
+              <th>Round / Role</th>
+              <!-- Player headers filled by JS -->
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows filled by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <form id="pick-form" class="pick-form">
+        <label for="character-input">Enter character for <span id="input-role"></span>:</label>
+        <input type="text" id="character-input" required autocomplete="off" />
+        <button type="submit" class="btn-primary">Confirm Pick</button>
+      </form>
+    </section>
+
+    <!-- Finalize screen -->
+    <section id="finalize-section" class="screen">
+      <h1>Finalized Heist Crews</h1>
+      <div id="final-crews"></div>
+
+      <h2>Heist Scenario</h2>
+      <div id="final-scenario"></div>
+
+      <h2>ChatGPT Evaluation Prompt</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+        <pre id="chatgpt-prompt" contenteditable="false" tabindex="0"
+          style="flex: 1; min-height: 200px; overflow: auto; background: #f9f9f9; padding: 1rem; border: 1px solid #ccc;"></pre>
+
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; min-width: 150px;">
+          <button id="copy-prompt-btn" class="btn-secondary">Copy</button>
+          <button id="edit-prompt-btn" class="btn-secondary">Edit</button>
+          <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
+            <button class="btn-primary">Go to ChatGPT →</button>
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  <script>
+    const infoBtn = document.getElementById('info-btn');
+    const infoPanel = document.getElementById('info-panel');
+    const closeInfo = document.getElementById('close-info');
+
+    infoBtn.addEventListener('click', () => {
+      infoPanel.classList.add('active');
+    });
+
+    closeInfo.addEventListener('click', () => {
+      infoPanel.classList.remove('active');
+    });
+  </script>
 </body>
+
+  <script src="app.js"></script>
+</body>
+
 </html>

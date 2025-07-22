@@ -229,9 +229,14 @@ document.body.appendChild(wildcardContainer);
 
 const wildcardMessageP = document.getElementById("wildcard-message");
 const wildcardCloseBtn = document.getElementById("wildcard-close-btn");
+const mindgamesSection = document.getElementById("mindgames-section");
+const mindgamesEntryArea = document.getElementById("mindgames-entry-area");
 
-let wildcardedRole = null; // keep globally so both finalizeDraft and alert can access
 // State variables
+let mindgamesKills = new Set();
+let mindgamesCurrentKillerIndex = 0;
+let wildcardedRole = null; // keep globally so both finalizeDraft and alert can access
+
 let playerCount = 3;
 let players = [];
 let categories = [];
@@ -256,6 +261,50 @@ function generateNameInputs() {
     // playerNamesContainer.appendChild(document.createElement("br"));
   }
 }
+function prepareMindGamesKillPhase() {
+  mindgamesKills.clear();
+  mindgamesCurrentKillerIndex = 0;
+  mindgamesEntryArea.innerHTML = "";
+  showScreen(mindgamesSection);
+  enterNextKill();
+}
+
+function enterNextKill() {
+  mindgamesEntryArea.innerHTML = "";
+
+  if (mindgamesCurrentKillerIndex >= playerCount) {
+    showScreen(draftSection);
+    return;
+  }
+
+  const prompt = document.createElement("p");
+  prompt.textContent = `Player ${mindgamesCurrentKillerIndex + 1} (${players[mindgamesCurrentKillerIndex]}), enter your secret “kill” (don’t let others see):`;
+
+  const input = document.createElement("input");
+  input.type = "password";
+  input.placeholder = "Secret character name";
+  input.id = "mindgames-kill-input";
+  input.name = "mindgames-kill-input";
+  input.autocomplete = "off";
+  input.required = true;
+
+  const button = document.createElement("button");
+  button.className = "btn-primary";
+  button.textContent = "Confirm (pass phone)";
+  button.onclick = () => {
+    const value = input.value.trim().toLowerCase();
+    if (!value) return alert("Please enter a character to kill.");
+    mindgamesKills.add(value);
+    mindgamesCurrentKillerIndex++;
+    enterNextKill();
+  };
+
+  mindgamesEntryArea.appendChild(prompt);
+  mindgamesEntryArea.appendChild(input);
+  mindgamesEntryArea.appendChild(button);
+  input.focus();
+}
+
 
 
 function getPickOrder(round) {
@@ -295,7 +344,7 @@ function getCategoryChoice() {
 }
 
 function showScreen(screen) {
-  [setupSection, draftSection, finalizeSection].forEach(s =>
+  [setupSection, draftSection, finalizeSection, mindgamesSection].forEach(s =>
     s.classList.toggle("active", s === screen)
   );
 }
@@ -423,7 +472,9 @@ function showFinalizeScreen() {
     for (let r = 0; r < 6; r++) {
       const { role, category, character } = draftData[r][p];
       const roleLine = document.createElement("p");
-      roleLine.innerHTML = `<span class="crew-role">${role}:</span> <span class="crew-character">${character}</span>${useCustomCategory ? "" : ` — ${category}`}`;
+const isKilled = draftData[r][p].killed;
+const killedTag = isKilled ? ` <span class="killed-tag">(💀 KILLED)</span>` : "";
+roleLine.innerHTML = `<span class="crew-role">${role}:</span> <span class="crew-character">${character}</span>${killedTag}${useCustomCategory ? "" : ` — ${category}`}`;
       crewDiv.appendChild(roleLine);
     }
     finalCrewsDiv.appendChild(crewDiv);
@@ -447,7 +498,7 @@ Evaluate the following Heist Crews with precision. For each crew member, assign 
 Then, do the following:
 
 1. 🏆 Rank all crews from strongest to weakest with total crew scores.
-2. 🔥 Identify the top 5–10 most underrated picks (“Heist Snubs”) with reasons.
+2. 🔥 Identify the top 5–10 best picks that were missed (“Heist Snubs”) with reasons.
 3. 🎭 Simulate an 'heist off' between the two crews that lasts 10 short numbered lines where anything can happen, the heist scenario greatly affecting this.
 4. 🧪 Bonus: Evaluate team chemistry, MVP of the heist, and give each team a codename.
 
@@ -458,6 +509,10 @@ Be stylish, punchy, and format results clearly—optimized for both desktop and 
   }
 
   prompt += `Here are the crews:\n\n`;
+  if (isModeActive("mindgames") && mindgamesKills.size > 0) {
+  const killList = [...mindgamesKills].map(k => `"${k}"`).join(", ");
+  prompt += `⚠️ Mind Games Mode is active. The following characters were secretly killed before the draft: ${killList}.\nIf any were drafted, reduce their score by 50 points.\n\n`;
+}
 
   if (wildcardedRole) {
     prompt += `🃏 Note: The Wild Card Round replaced one traditional role with a surprise twist: "${wildcardedRole}".\n\n`;
@@ -521,7 +576,11 @@ setupForm.addEventListener("submit", e => {
   updateDraftInfo();
   characterInput.value = "";
   characterInput.focus();
+if (isModeActive("mindgames")) {
+  prepareMindGamesKillPhase();
+} else {
   showScreen(draftSection);
+}
 });
 // Mode checkboxes
 const modeCheckboxes = document.querySelectorAll('input[name="xtra-mode"]');
@@ -565,6 +624,10 @@ pickForm.addEventListener("submit", e => {
   const playerIndex = pickOrder[currentPickInRound];
 
   draftData[currentRound][playerIndex].character = charName;
+  // Tag pick if it's killed
+if (isModeActive("mindgames") && mindgamesKills.has(lowerName)) {
+  draftData[currentRound][playerIndex].killed = true;
+}
 
   currentPickInRound++;
   if (currentPickInRound >= playerCount) {
