@@ -546,7 +546,14 @@ function copyPromptToClipboard() {
     })
     .catch(() => alert("Failed to copy prompt. Please copy manually."));
 }
-
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 setupForm.addEventListener("submit", e => {
   e.preventDefault();
   const count = parseInt(playerCountInput.value, 10);
@@ -560,7 +567,7 @@ setupForm.addEventListener("submit", e => {
     customCategoryName = cat;
     categories = Array(6).fill(customCategoryName);
   } else {
-    categories = [...RANDOM_CATEGORIES].slice(0, 6);
+    categories = shuffleArray(RANDOM_CATEGORIES).slice(0, 6);
   }
 
   initPlayers(playerCount);
