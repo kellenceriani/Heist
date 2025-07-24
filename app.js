@@ -504,7 +504,7 @@ Then, do the following:
 
 1. 🏆 Rank all crews from strongest to weakest with total crew scores.
 2. 🔥 Identify the top 5–10 best picks that were missed (“Heist Snubs”) with reasons.
-3. 🎭 Simulate an 'heist off' between the two crews that lasts 10 short numbered lines where anything can happen, the heist scenario greatly affecting this.
+3. 🎭 Simulate an 'heist off' between the two crews that lasts 10 short numbered lines where anything can happen (60% based on randomness and 40% based on OVR), the heist scenario greatly affecting this.
 4. 🧪 Bonus: Evaluate team chemistry, MVP of the heist, and give each team a codename.
 
 Be stylish, punchy, and format results clearly—optimized for both desktop and mobile. Use bullet points, spacing, and emojis where helpful.\n\n`;
